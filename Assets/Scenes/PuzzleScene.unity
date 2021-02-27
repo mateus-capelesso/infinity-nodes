@@ -154,13 +154,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GenerateRandom: 1
   canvas: {fileID: 1588428113}
-  piecePrefabs:
-  - {fileID: 3010778770412287901, guid: 3af712dcba049034f86d0e5f62048eb0, type: 3}
-  - {fileID: 5639759273899163680, guid: 811fbc80550031f40a0b3c231e31dc2e, type: 3}
-  - {fileID: 3964190721185749606, guid: 19a1fe9c81ce31843b8cb166fb1022f9, type: 3}
-  - {fileID: 8731495132453657269, guid: fb8462e40b1d91a4d9972aed6dbb6eb0, type: 3}
-  - {fileID: 8262681997072001708, guid: 2ef890a1a8a51df46bca3f39d608bbf0, type: 3}
-  - {fileID: 2133098540840237962, guid: 72437d0f8c8ce444ab85396ed267c95d, type: 3}
   puzzle: {fileID: 380629257}
 --- !u!4 &222614819
 Transform:
@@ -306,7 +299,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 2, y: 2, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

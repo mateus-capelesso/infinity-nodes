@@ -1,5 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.Serialization;
+using UnityEngine.UIElements;
 
 public class Puzzle : MonoBehaviour
 {
@@ -10,8 +14,10 @@ public class Puzzle : MonoBehaviour
     [SerializeField] private GameObject[] piecesPrefabs;
     
     private PuzzlePiece[,] _pieces;
-    private int _winValue;
-    private int _curValue;
+
+    private List<PuzzlePiece> _availablePiecePositions;
+    // private int _winValue;
+    // private int _curValue;
 
 
 
@@ -26,13 +32,15 @@ public class Puzzle : MonoBehaviour
     private void GeneratePuzzle()
     {
         Random.InitState(seed.GetHashCode());
-        
+        _availablePiecePositions = new List<PuzzlePiece>();   
         _pieces = new PuzzlePiece[width, height];
 
         int[] auxValues = { 0, 0, 0, 0 };
 		
-        for (int h = 0; h < height; h++) { 
-            for (int w = 0; w < width; w++) {
+        for (var h = 0; h < height; h++) 
+        { 
+            for (var w = 0; w < width; w++) 
+            {
 
                 //width restrictions
                 if (w == 0)
@@ -44,8 +52,7 @@ public class Puzzle : MonoBehaviour
                     auxValues [1] = 0;
                 else
                     auxValues [1] = Random.Range (0, 2);
-
-
+                
                 //heigth resctrictions
 
                 if (h == 0) 
@@ -57,8 +64,7 @@ public class Puzzle : MonoBehaviour
                     auxValues [0] = 0;
                 else
                     auxValues [0] = Random.Range (0, 2);
-
-
+                
                 //tells us PuzzlePiece type
                 int valueSum = auxValues [0] + auxValues [1] + auxValues [2] + auxValues [3];
 				
@@ -66,18 +72,43 @@ public class Puzzle : MonoBehaviour
                     valueSum = 5;
 
 
-                GameObject go = Instantiate (piecesPrefabs [valueSum], new Vector3 (w, h, 0), Quaternion.identity, transform);
-                    
-                while (go.GetComponent<PuzzlePiece>().values [0] != auxValues [0] ||
-                       go.GetComponent<PuzzlePiece>().values [1] != auxValues [1] ||
-                       go.GetComponent<PuzzlePiece>().values [2] != auxValues [2] ||
-                       go.GetComponent<PuzzlePiece>().values [3] != auxValues [3])
+                GameObject obj = Instantiate (piecesPrefabs[valueSum], new Vector3 (w, h, 0), Quaternion.identity, transform);
+                
+                while (obj.GetComponent<PuzzlePiece>().values [0] != auxValues [0] ||
+                       obj.GetComponent<PuzzlePiece>().values [1] != auxValues [1] ||
+                       obj.GetComponent<PuzzlePiece>().values [2] != auxValues [2] ||
+                       obj.GetComponent<PuzzlePiece>().values [3] != auxValues [3])
                 {
-                    go.GetComponent<PuzzlePiece>().RotatePiece ();
+                    obj.GetComponent<PuzzlePiece>().RotatePiece ();
                 } 
-                _pieces [w, h] = go.GetComponent<PuzzlePiece> ();
+                
+                var piece = obj.GetComponent<PuzzlePiece>();
+                piece.SetPieceType(valueSum);
+                piece.TargetPosition = new Vector2(w, h);
+                
+                if(valueSum > 1 && valueSum != 4)
+                    _availablePiecePositions.Add(piece);
+
+                
+                _pieces[w, h] = piece;
+
                 
             }
+        }
+        ShufflePiecePositions();
+    }
+
+    private void ShufflePiecePositions()
+    {
+        foreach (var piece in _availablePiecePositions.Where(piece => !piece.Swaped))
+        {
+            var random = Random.Range(0, _availablePiecePositions.Where(p => !p.Swaped).ToList().Count);
+            var secondPiece = _availablePiecePositions[random];
+            
+            if (piece == secondPiece) continue;
+            
+            piece.ChangePosition(secondPiece.TargetPosition);
+            secondPiece.ChangePosition(piece.TargetPosition);
         }
     }
 }

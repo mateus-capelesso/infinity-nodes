@@ -2,10 +2,15 @@
 using System.Collections;
 using TreeEditor;
 
-public class PuzzlePiece : MonoBehaviour {
+public class PuzzlePiece : MonoBehaviour
+{
 
-
+	private PuzzlePieceType _type;
 	public int[] values;
+	
+	public Vector2 TargetPosition { get; set; }
+
+	public bool Swaped { get; set; }
 
 	public void RotatePiece()
 	{
@@ -13,7 +18,7 @@ public class PuzzlePiece : MonoBehaviour {
 		RotateValues ();
 	}
 	
-	public void RotateValues()
+	private void RotateValues()
 	{
 		int aux = values [0];
 		
@@ -23,6 +28,21 @@ public class PuzzlePiece : MonoBehaviour {
 		values[3] = aux;
 	}
 
+	public void ChangePosition(Vector2 newPosition)
+	{
+		transform.position = new Vector3(newPosition.x, newPosition.y, 0f);
+		Swaped = true;
+	}
 
+	public void SetPieceType(int value)
+	{
+		_type = (PuzzlePieceType)value;
+		if (_type == PuzzlePieceType.Begin || _type == PuzzlePieceType.Null || _type == PuzzlePieceType.Cross)
+		{
+			Swaped = true;
+		}
+	} 
+
+	public PuzzlePieceType PieceType => _type;
 
 }
