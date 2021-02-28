@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 public class GameManager : MonoBehaviour
@@ -26,21 +28,38 @@ public class GameManager : MonoBehaviour
 	
 	public bool GenerateRandom;
 	public GameObject canvas;
+	public Button nextLevelButton;
+	public TextMeshProUGUI levelText;
 	
-	public Puzzle puzzle;
 
 	private int _winValue;
 	private int _piecesOnCorrectPlaces;
 
+	private int level;
+	private int maxLevel;
+	private int points;
+
 
 	// Use this for initialization
-	void Start () {
+	void Start ()
+	{
+		nextLevelButton.onClick.AddListener(() =>
+		{
+			Puzzle.Instance.DeletePuzzle();
+			LoadPuzzle();
+		});
+		
+		LoadUserData();
+		LoadPuzzle();
+	}
 
-		canvas.SetActive (false);
-
-		if (!GenerateRandom) return;
-
-		puzzle.BuildPuzzle("seed1111", 6, 6);
+	private void LoadPuzzle()
+	{
+		SaveUserData();
+		nextLevelButton.gameObject.SetActive(false);
+		levelText.text = level.ToString();
+		var puzzle = Resources.Load<PuzzleLevels>(level.ToString());
+		Puzzle.Instance.BuildPuzzle(puzzle.seed, puzzle.width, puzzle.height);
 	}
 
 	public void SetWinValue(int value)
@@ -55,17 +74,33 @@ public class GameManager : MonoBehaviour
 		if (_piecesOnCorrectPlaces >= _winValue)
 		{
 			Win();
+			points += _winValue;
+			level++;
+			if (level > maxLevel)
+			{
+				maxLevel = level;
+			}
+			nextLevelButton.gameObject.SetActive(true);
 		}
 	}
 	
 	private void Win()
 	{
 		canvas.SetActive (true);
-		
 	}
 
 	private void LoadUserData()
 	{
-		
+		level = PlayerPrefs.HasKey("level") ? PlayerPrefs.GetInt("level") : 1;
+		points = PlayerPrefs.HasKey("points") ? PlayerPrefs.GetInt("points") : 1;
+		maxLevel = PlayerPrefs.HasKey("maxLevel") ? PlayerPrefs.GetInt("maxLevel") : 1;
+	}
+
+	private void SaveUserData()
+	{
+		PlayerPrefs.SetInt("level", level);
+		PlayerPrefs.SetInt("points", points);
+		PlayerPrefs.SetInt("maxLevel", maxLevel);
+		PlayerPrefs.Save();
 	}
 }

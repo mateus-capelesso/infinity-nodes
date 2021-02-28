@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using TreeEditor;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEditor.Scripting;
@@ -201,4 +202,21 @@ public class Puzzle : MonoBehaviour
     public void HidePuzzle() => puzzleParent.gameObject.SetActive(false);
 
     public void ShowPuzzle() => puzzleParent.gameObject.SetActive(true);
+
+    public void DeletePuzzle()
+    {
+        foreach (var p in _pieces)
+        {
+            Destroy(p.gameObject);
+        }
+
+        foreach (var s in _slots)
+        {
+            Destroy(s.gameObject);
+        }
+
+        _pieces = new PuzzlePiece[0, 0];
+        _slots.Clear();
+        _availablePiecePositions.Clear();
+    }
 }

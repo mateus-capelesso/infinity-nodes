@@ -63,6 +63,7 @@ public class PuzzlePiece : MonoBehaviour
 		{
 			// Return to original position
 			transform.position = new Vector3(_initiatePosition.x, _initiatePosition.y, 0f);
+			Handheld.Vibrate();
 		}
 	}
 
