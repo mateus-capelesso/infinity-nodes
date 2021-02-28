@@ -109,6 +109,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 580c562222c0c1c4da928d4a68dc14d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  values: 01000000000000000100000000000000
-  speed: 0.2
-  gm: {fileID: 0}
+  possibleConnections: 01000000000000000100000000000000
+  swapped: 0
