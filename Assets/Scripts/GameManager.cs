@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
 
 		if (!GenerateRandom) return;
 
-		puzzle.BuildPuzzle("seed1", 5, 5);
+		puzzle.BuildPuzzle("seed1111", 6, 6);
 	}
 
 	public void SetWinValue(int value)
@@ -61,6 +61,11 @@ public class GameManager : MonoBehaviour
 	private void Win()
 	{
 		canvas.SetActive (true);
+		
+	}
+
+	private void LoadUserData()
+	{
 		
 	}
 }

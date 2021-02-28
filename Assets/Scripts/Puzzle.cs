@@ -40,6 +40,8 @@ public class Puzzle : MonoBehaviour
     [Header("Slot Component")]
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotParent;
+
+    [Header("Camera")] public CameraController camera;
     
     private PuzzlePiece[,] _pieces;
     private List<Slot> _slots;
@@ -60,7 +62,9 @@ public class Puzzle : MonoBehaviour
 
     private void GeneratePuzzle()
     {
+        
         Random.InitState(seed.GetHashCode());
+        camera.SetCameraPosition();
         _availablePiecePositions = new List<PuzzlePiece>();
         _slots = new List<Slot>();
         _pieces = new PuzzlePiece[width, height];
@@ -106,7 +110,8 @@ public class Puzzle : MonoBehaviour
                 var slotComponent = slot.GetComponent<Slot>();
                 _slots.Add(slotComponent);
 
-
+                
+                // Rotate piece until it fits the connection requirements
                 var obj = Instantiate (piecesPrefabs[valueSum], new Vector3 (w, h, 0), Quaternion.identity, puzzleParent);
 
                 while (obj.GetComponent<PuzzlePiece>().PossibleConnections [0] != auxValues [0] ||
@@ -114,7 +119,7 @@ public class Puzzle : MonoBehaviour
                        obj.GetComponent<PuzzlePiece>().PossibleConnections [2] != auxValues [2] ||
                        obj.GetComponent<PuzzlePiece>().PossibleConnections [3] != auxValues [3])
                 {
-                    obj.GetComponent<PuzzlePiece>().RotatePiece ();
+                    obj.GetComponent<PuzzlePiece>().RotatePiece();
                 } 
                 
                 var piece = obj.GetComponent<PuzzlePiece>();
@@ -122,6 +127,7 @@ public class Puzzle : MonoBehaviour
                 slotComponent.SetSlotValues(new Vector2(w, h), auxValues, piece);
                 piece.CorrectPosition = new Vector2(w, h);
 
+                // Ignoring begin, null and 4-way piece, just to give a direction to the player
                 if (valueSum > 1 && valueSum != 4)
                 {
                     _availablePiecePositions.Add(piece);
@@ -146,6 +152,8 @@ public class Puzzle : MonoBehaviour
             if(_availablePiecePositions[i].swapped) continue;
 
             var toBeSwappedList = _availablePiecePositions.Where(p => !p.swapped).ToList();
+            
+            // Avoid error when trying to compare the last item on the list. It happens when the list has a odd lenght
             if (toBeSwappedList.Count <= 1)
             {
                 _availablePiecePositions[i].ChangePosition(_availablePiecePositions[i].CorrectPosition);
@@ -173,7 +181,6 @@ public class Puzzle : MonoBehaviour
     {
         var piece = _availablePiecePositions.Where(p => p.GetInitiatePosition() == newPosition).ToList().First();
         piece.ChangePosition(initialPosition);
-        
     }
     
     public bool ValidatePuzzlePiecePosition(Vector2 coordinates, int[] pieceConnection)
@@ -185,4 +192,13 @@ public class Puzzle : MonoBehaviour
     {
         return _slots.Where(s => s.GetSlotFromPosition(coordinates)).ToList().First();
     }
+
+    public Vector2 GetPuzzleWidth()
+    {
+        return new Vector2(width, height);
+    }
+
+    public void HidePuzzle() => puzzleParent.gameObject.SetActive(false);
+
+    public void ShowPuzzle() => puzzleParent.gameObject.SetActive(true);
 }

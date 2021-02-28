@@ -1,11 +1,4 @@
-﻿using System;
-using UnityEngine;
-using System.Collections;
-using System.Xml;
-using TreeEditor;
-using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 public class PuzzlePiece : MonoBehaviour
 {
@@ -20,7 +13,7 @@ public class PuzzlePiece : MonoBehaviour
 
 	public Vector2 CorrectPosition { get; set; }
 
-	public bool swapped = false;
+	public bool swapped;
 	private Vector2 _initiatePosition;
 	private Vector3 _offset;
 
@@ -32,21 +25,22 @@ public class PuzzlePiece : MonoBehaviour
 	
 	private void RotateValues()
 	{
-		int aux = possibleConnections [0];
+		int aux = PossibleConnections[0];
 		
-		for (int i = 0; i < possibleConnections.Length-1; i++) {
-			possibleConnections[i] = possibleConnections[i + 1];
+		for (int i = 0; i < PossibleConnections.Length - 1; i++) {
+			PossibleConnections[i] = PossibleConnections[i + 1];
 		}
-		possibleConnections[3] = aux;
+		PossibleConnections[3] = aux;
 	}
 
 	public void ChangePosition(Vector2 newPosition)
 	{
-		transform.position = new Vector3(newPosition.x, newPosition.y, 0f);
 		_initiatePosition = newPosition;
+		transform.position = new Vector3(newPosition.x, newPosition.y, 0f);
 		swapped = true;
 		GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.5f);
 
+		// Check if new position fits slot requirements
 		if(Puzzle.Instance.ValidatePuzzlePiecePosition(newPosition, possibleConnections))
 			PieceOnCorrectPosition();
 	}
@@ -62,10 +56,12 @@ public class PuzzlePiece : MonoBehaviour
 		{
 			Puzzle.Instance.SwapPiecePosition(coordinates, _initiatePosition);
 			transform.position = new Vector3(coordinates.x, coordinates.y, 0);
+			_initiatePosition = coordinates;
 			PieceOnCorrectPosition();
 		}
 		else
 		{
+			// Return to original position
 			transform.position = new Vector3(_initiatePosition.x, _initiatePosition.y, 0f);
 		}
 	}
@@ -82,6 +78,7 @@ public class PuzzlePiece : MonoBehaviour
 		GetComponent<BoxCollider>().enabled = false;
 	}
 
+	#region MouseEvents
 	private void OnMouseDown()
 	{
 		var position = gameObject.transform.position;
@@ -104,4 +101,6 @@ public class PuzzlePiece : MonoBehaviour
 
 		AnalyzePiecePosition(new Vector2(x, y));
 	}
+	
+	#endregion
 }
