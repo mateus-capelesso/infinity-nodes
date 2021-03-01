@@ -78,7 +78,6 @@ public class Puzzle : MonoBehaviour
         { 
             for (var w = 0; w < width; w++) 
             {
-
                 //width restrictions
                 if (w == 0)
                     auxValues[3] = 0;
@@ -154,12 +153,13 @@ public class Puzzle : MonoBehaviour
         {
             if(_availablePiecePositions[i].swapped) continue;
 
+            // variable swapped controls which pieces weren't swapped
             var toBeSwappedList = _availablePiecePositions.Where(p => !p.swapped).ToList();
             
             // Avoid error when trying to compare the last item on the list. It happens when the list has a odd lenght
             if (toBeSwappedList.Count <= 1)
             {
-                _availablePiecePositions[i].ChangePosition(_availablePiecePositions[i].CorrectPosition);
+                _availablePiecePositions[i].SetNewPosition(_availablePiecePositions[i].CorrectPosition);
                 break;
             }
             var random = Random.Range(0, toBeSwappedList.Count);
@@ -169,8 +169,7 @@ public class Puzzle : MonoBehaviour
 
             if (firstPiece != secondPiece)
             {
-                firstPiece.ChangePosition(secondPiece.CorrectPosition);
-                secondPiece.ChangePosition(firstPiece.CorrectPosition);
+                SwapPieceByPieces(firstPiece, secondPiece);
             }
             else
             {
@@ -179,24 +178,32 @@ public class Puzzle : MonoBehaviour
         }
     }
     
-
-    public void SwapPiecePosition(Vector2 newPosition, Vector2 initialPosition)
+    public void SwapPieceByPieces(PuzzlePiece firstPiece, PuzzlePiece secondPiece)
     {
-        var piece = _availablePiecePositions.Where(p => p.GetInitiatePosition() == newPosition).ToList().First();
-        piece.ChangePosition(initialPosition);
+        firstPiece.SetNewPosition(secondPiece.CorrectPosition);
+        secondPiece.SetNewPosition(firstPiece.CorrectPosition);
     }
     
-    public bool ValidatePuzzlePiecePosition(Vector2 coordinates, int[] pieceConnection)
-    {
-        return GetSlotFromCoordinate(coordinates).CorrectConnections(pieceConnection);
-    }
-
+    // returns the slot that has the same coordinate as the dragged piece
     private Slot GetSlotFromCoordinate(Vector2 coordinates)
     {
         return _slots.Where(s => s.GetSlotFromPosition(coordinates)).ToList().First();
     }
+    
+    // checks if dragged piece has the correct connection values
+    public bool ValidatePuzzlePiecePosition(Vector2 coordinates, int[] pieceConnection)
+    {
+        return GetSlotFromCoordinate(coordinates).CorrectConnections(pieceConnection);
+    }
+    
+    // swap position between dragged piece and the one that sits on spot
+    public void SwapPieceByPosition(Vector2 newPosition, Vector2 initialPosition)
+    {
+        var piece = _availablePiecePositions.Where(p => p.GetInitiatePosition() == newPosition).ToList().First();
+        piece.SetNewPosition(initialPosition);
+    }
 
-    public Vector2 GetPuzzleWidth()
+    public Vector2 GetPuzzleSize()
     {
         return new Vector2(width, height);
     }
@@ -218,7 +225,7 @@ public class Puzzle : MonoBehaviour
         _availablePiecePositions.Clear();
     }
 
-    public void PlayParticles()
+    public void PlayParticlesFromPieces()
     {
         foreach (var p in _pieces)
         {

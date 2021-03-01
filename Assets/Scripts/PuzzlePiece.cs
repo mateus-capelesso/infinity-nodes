@@ -42,7 +42,7 @@ public class PuzzlePiece : MonoBehaviour
 	
 	#endregion
 
-	public void ChangePosition(Vector2 newPosition)
+	public void SetNewPosition(Vector2 newPosition)
 	{
 		_initiatePosition = newPosition;
 		transform.position = new Vector3(newPosition.x, newPosition.y, 0f);
@@ -59,11 +59,11 @@ public class PuzzlePiece : MonoBehaviour
 		return _initiatePosition;
 	}
 
-	private void AnalyzePiecePosition(Vector2 coordinates)
+	private void AnalyzeDraggedPosition(Vector2 coordinates)
 	{
 		if (Puzzle.Instance.ValidatePuzzlePiecePosition(coordinates, possibleConnections))
 		{
-			Puzzle.Instance.SwapPiecePosition(coordinates, _initiatePosition);
+			Puzzle.Instance.SwapPieceByPosition(coordinates, _initiatePosition);
 			transform.position = new Vector3(coordinates.x, coordinates.y, 0);
 			_initiatePosition = coordinates;
 			PieceOnCorrectPosition();
@@ -73,13 +73,14 @@ public class PuzzlePiece : MonoBehaviour
 		{
 			// Return to original position
 			transform.position = new Vector3(_initiatePosition.x, _initiatePosition.y, 0f);
+			// using standard vibrate system, not haptic
 			Handheld.Vibrate();
 		}
 	}
 
 	private void PieceOnCorrectPosition()
 	{
-		GameManager.Instance.OnPieceOnCorrectPosition();
+		GameManager.Instance.PieceOnCorrectPosition();
 		GetComponent<SpriteRenderer>().color = GetComponent<SpriteRenderer>().color = new Color(pieceColor.r, pieceColor.g, pieceColor.b, 0.8f);
 		DeactivatePiece();
 	}
@@ -118,7 +119,7 @@ public class PuzzlePiece : MonoBehaviour
 		var x = Mathf.RoundToInt(position.x);
 		var y = Mathf.RoundToInt(position.y);
 
-		AnalyzePiecePosition(new Vector2(x, y));
+		AnalyzeDraggedPosition(new Vector2(x, y));
 	}
 	
 	#endregion

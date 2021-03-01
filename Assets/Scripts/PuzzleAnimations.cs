@@ -28,7 +28,7 @@ public class PuzzleAnimations : MonoBehaviour
 
     private void PlayParticles()
     {
-        Puzzle.Instance.PlayParticles();
+        Puzzle.Instance.PlayParticlesFromPieces();
     }
 
     private void SetColor(Color c)

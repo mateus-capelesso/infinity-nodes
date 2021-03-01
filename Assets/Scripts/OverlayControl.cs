@@ -39,10 +39,10 @@ public class OverlayControl : MonoBehaviour
             "to",fadedBackgroundColor,
             "onupdate","SetColor",
             "time", duration,
-            "oncomplete", "DeactivateOverlay"));
+            "oncomplete", "EndFadeOut"));
     }
 
-    private void DeactivateOverlay()
+    private void EndFadeOut()
     {
         gameObject.SetActive(false);
     }

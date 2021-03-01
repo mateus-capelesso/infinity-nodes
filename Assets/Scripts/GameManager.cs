@@ -26,55 +26,47 @@ public class GameManager : MonoBehaviour
 	#endregion
 	
 	public GameObject canvas;
-	public Button nextLevelButton;
 	public GameView gameView;
 
 
 	private int _winValue;
 	private int _piecesOnCorrectPlaces;
 
-	private int level;
-	private int maxLevel;
-	private int points;
+	private int _level;
+	private int _maxLevel;
+	private int _points;
 
 	public Action OnPuzzleOver;
 	public Action OnNextPuzzleCalled;
-
-
-	// Use this for initialization
+	
 	void Start ()
 	{
 		Screen.sleepTimeout = SleepTimeout.NeverSleep;
-		nextLevelButton.onClick.AddListener(() =>
-		{
-			OnNextPuzzleCalled?.Invoke();
-			StartCoroutine(WaitHideAnimation());
-		});
-		
+
 		LoadUserData();
 		LoadPuzzle();
 	}
 
-	public void LoadPuzzle()
+	private void LoadPuzzle()
 	{
 		SaveUserData();
-		nextLevelButton.gameObject.SetActive(false);
-		gameView.SetLevelView(level);
-		if (level > 30) level = 1; // Adding a simple barrier, so the game don't breaks 
-		var puzzle = Resources.Load<PuzzleLevels>(level.ToString());
+		gameView.SetLevelView(_level.ToString());
+		
+		if (_level > 30) _level = 1; // Adding a simple barrier, so the game don't breaks 
+		var puzzle = Resources.Load<PuzzleLevels>(_level.ToString());
 		Puzzle.Instance.BuildPuzzle(puzzle.seed, puzzle.width, puzzle.height);
 	}
 
 	public int GetMaxLevel()
 	{
-		return maxLevel;
+		return _maxLevel;
 	}
-	
+
 	public void SetLevel(int value)
 	{
-		level = value;
+		_level = value;
 		OnNextPuzzleCalled?.Invoke();
-		StartCoroutine(WaitHideAnimation());
+		StartCoroutine(WaitHideAnimation(1f));
 	}
 
 	public void SetWinValue(int value)
@@ -83,19 +75,20 @@ public class GameManager : MonoBehaviour
 		_piecesOnCorrectPlaces = 0;
 	}
 
-	public void OnPieceOnCorrectPosition()
+	public void PieceOnCorrectPosition()
 	{
 		_piecesOnCorrectPlaces++;
 		if (_piecesOnCorrectPlaces >= _winValue)
 		{
 			Win();
-			points += _winValue;
-			level++;
-			if (level > maxLevel)
+			_points += _winValue;
+			_level++;
+			if (_level > _maxLevel)
 			{
-				maxLevel = level;
+				_maxLevel = _level;
 			}
-			nextLevelButton.gameObject.SetActive(true);
+
+			StartCoroutine(WaitHideAnimation(2f));
 		}
 	}
 	
@@ -105,26 +98,29 @@ public class GameManager : MonoBehaviour
 		canvas.SetActive (true);
 	}
 
-	IEnumerator WaitHideAnimation()
+	IEnumerator WaitHideAnimation(float time)
 	{
-		yield return new WaitForSeconds(1f);
+		yield return new WaitForSeconds(0.5f);
+		gameView.SetLevelView("");
+		OnNextPuzzleCalled?.Invoke();
+		yield return new WaitForSeconds(time);
 		LoadPuzzle();
 	}
-
+	
 	#region User Data
 
 	private void LoadUserData()
 	{
-		level = PlayerPrefs.HasKey("level") ? PlayerPrefs.GetInt("level") : 1;
-		points = PlayerPrefs.HasKey("points") ? PlayerPrefs.GetInt("points") : 1;
-		maxLevel = PlayerPrefs.HasKey("maxLevel") ? PlayerPrefs.GetInt("maxLevel") : 1;
+		_level = PlayerPrefs.HasKey("level") ? PlayerPrefs.GetInt("level") : 1;
+		_points = PlayerPrefs.HasKey("points") ? PlayerPrefs.GetInt("points") : 1;
+		_maxLevel = PlayerPrefs.HasKey("maxLevel") ? PlayerPrefs.GetInt("maxLevel") : 1;
 	}
 
 	private void SaveUserData()
 	{
-		PlayerPrefs.SetInt("level", level);
-		PlayerPrefs.SetInt("points", points);
-		PlayerPrefs.SetInt("maxLevel", maxLevel);
+		PlayerPrefs.SetInt("level", _level);
+		PlayerPrefs.SetInt("points", _points);
+		PlayerPrefs.SetInt("maxLevel", _maxLevel);
 		PlayerPrefs.Save();
 	}
 
