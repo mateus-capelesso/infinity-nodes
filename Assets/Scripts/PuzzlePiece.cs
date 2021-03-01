@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 public class PuzzlePiece : MonoBehaviour
 {
@@ -16,7 +18,12 @@ public class PuzzlePiece : MonoBehaviour
 	public bool swapped;
 	private Vector2 _initiatePosition;
 	private Vector3 _offset;
-
+	
+	[Header("Color")]
+	public Color pieceColor;
+	
+	#region RotateConnections
+	
 	public void RotatePiece()
 	{
 		transform.Rotate(new Vector3(0f, 0f , 90f));
@@ -32,13 +39,15 @@ public class PuzzlePiece : MonoBehaviour
 		}
 		PossibleConnections[3] = aux;
 	}
+	
+	#endregion
 
 	public void ChangePosition(Vector2 newPosition)
 	{
 		_initiatePosition = newPosition;
 		transform.position = new Vector3(newPosition.x, newPosition.y, 0f);
 		swapped = true;
-		GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.5f);
+		GetComponent<SpriteRenderer>().color = new Color(pieceColor.r, pieceColor.g, pieceColor.b, 0.5f);
 
 		// Check if new position fits slot requirements
 		if(Puzzle.Instance.ValidatePuzzlePiecePosition(newPosition, possibleConnections))
@@ -58,6 +67,7 @@ public class PuzzlePiece : MonoBehaviour
 			transform.position = new Vector3(coordinates.x, coordinates.y, 0);
 			_initiatePosition = coordinates;
 			PieceOnCorrectPosition();
+			SoundController.Instance.PieceSound();
 		}
 		else
 		{
@@ -67,10 +77,10 @@ public class PuzzlePiece : MonoBehaviour
 		}
 	}
 
-	public void PieceOnCorrectPosition()
+	private void PieceOnCorrectPosition()
 	{
 		GameManager.Instance.OnPieceOnCorrectPosition();
-		GetComponent<SpriteRenderer>().color = Color.white;
+		GetComponent<SpriteRenderer>().color = GetComponent<SpriteRenderer>().color = new Color(pieceColor.r, pieceColor.g, pieceColor.b, 0.8f);
 		DeactivatePiece();
 	}
 
@@ -84,6 +94,7 @@ public class PuzzlePiece : MonoBehaviour
 	{
 		var position = gameObject.transform.position;
 		_offset = position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f));
+		SoundController.Instance.PieceSound();
 	}
 
 	public void OnMouseDrag()

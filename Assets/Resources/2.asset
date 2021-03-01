@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: 2
   m_EditorClassIdentifier: 
   width: 3
-  height: 3
-  seed: level2
+  height: 4
+  seed: seedlevel2

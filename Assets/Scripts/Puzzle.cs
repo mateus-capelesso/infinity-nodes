@@ -1,13 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using TreeEditor;
-using Unity.IO.LowLevel.Unsafe;
-using UnityEditor.Scripting;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.Serialization;
-using UnityEngine.UIElements;
+using Random = UnityEngine.Random;
 
 public class Puzzle : MonoBehaviour
 {
@@ -36,7 +33,7 @@ public class Puzzle : MonoBehaviour
     [SerializeField] private int height;
     
     [SerializeField] private GameObject[] piecesPrefabs;
-    [SerializeField] private Transform puzzleParent;
+    [SerializeField] private PuzzleAnimations puzzleAnimations;
     
     [Header("Slot Component")]
     [SerializeField] private GameObject slotPrefab;
@@ -51,6 +48,10 @@ public class Puzzle : MonoBehaviour
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        GameManager.Instance.OnNextPuzzleCalled += () =>
+        {
+            StartCoroutine(WaitHideAnimation(DeletePuzzle));
+        };
     }
 
     public void BuildPuzzle(string puzzleSeed, int puzzleWidth, int puzzleHeight)
@@ -66,6 +67,7 @@ public class Puzzle : MonoBehaviour
         
         Random.InitState(seed.GetHashCode());
         camera.SetCameraPosition();
+        
         _availablePiecePositions = new List<PuzzlePiece>();
         _slots = new List<Slot>();
         _pieces = new PuzzlePiece[width, height];
@@ -100,7 +102,7 @@ public class Puzzle : MonoBehaviour
                 else
                     auxValues[0] = Random.Range(0, 2);
                 
-                //tells us PuzzlePiece type
+                //PuzzlePiece type
                 int valueSum = auxValues[0] + auxValues[1] + auxValues[2] + auxValues [3];
 				
                 if (valueSum == 2 && auxValues[0] != auxValues[2])
@@ -113,7 +115,7 @@ public class Puzzle : MonoBehaviour
 
                 
                 // Rotate piece until it fits the connection requirements
-                var obj = Instantiate (piecesPrefabs[valueSum], new Vector3 (w, h, 0), Quaternion.identity, puzzleParent);
+                var obj = Instantiate (piecesPrefabs[valueSum], new Vector3 (w, h, 0), Quaternion.identity, puzzleAnimations.transform);
 
                 while (obj.GetComponent<PuzzlePiece>().PossibleConnections [0] != auxValues [0] ||
                        obj.GetComponent<PuzzlePiece>().PossibleConnections [1] != auxValues [1] ||
@@ -127,7 +129,7 @@ public class Puzzle : MonoBehaviour
                 
                 slotComponent.SetSlotValues(new Vector2(w, h), auxValues, piece);
                 piece.CorrectPosition = new Vector2(w, h);
-
+                
                 // Ignoring begin, null and 4-way piece, just to give a direction to the player
                 if (valueSum > 1 && valueSum != 4)
                 {
@@ -199,11 +201,7 @@ public class Puzzle : MonoBehaviour
         return new Vector2(width, height);
     }
 
-    public void HidePuzzle() => puzzleParent.gameObject.SetActive(false);
-
-    public void ShowPuzzle() => puzzleParent.gameObject.SetActive(true);
-
-    public void DeletePuzzle()
+    private void DeletePuzzle()
     {
         foreach (var p in _pieces)
         {
@@ -218,5 +216,11 @@ public class Puzzle : MonoBehaviour
         _pieces = new PuzzlePiece[0, 0];
         _slots.Clear();
         _availablePiecePositions.Clear();
+    }
+
+    IEnumerator WaitHideAnimation(Action callback)
+    {
+        yield return new WaitForSeconds(1f);
+        callback?.Invoke();
     }
 }

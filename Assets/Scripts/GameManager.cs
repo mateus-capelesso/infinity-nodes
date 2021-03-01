@@ -1,7 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections;
-using TMPro;
-using UnityEngine.SceneManagement;
+using UnityEngine;
 using UnityEngine.UI;
 
 
@@ -26,11 +25,10 @@ public class GameManager : MonoBehaviour
 
 	#endregion
 	
-	public bool GenerateRandom;
 	public GameObject canvas;
 	public Button nextLevelButton;
-	public TextMeshProUGUI levelText;
-	
+	public GameView gameView;
+
 
 	private int _winValue;
 	private int _piecesOnCorrectPlaces;
@@ -39,27 +37,43 @@ public class GameManager : MonoBehaviour
 	private int maxLevel;
 	private int points;
 
+	public Action OnPuzzleOver;
+	public Action OnNextPuzzleCalled;
+
 
 	// Use this for initialization
 	void Start ()
 	{
 		nextLevelButton.onClick.AddListener(() =>
 		{
-			Puzzle.Instance.DeletePuzzle();
-			LoadPuzzle();
+			OnNextPuzzleCalled?.Invoke();
+			StartCoroutine(WaitHideAnimation());
 		});
 		
 		LoadUserData();
 		LoadPuzzle();
 	}
 
-	private void LoadPuzzle()
+	public void LoadPuzzle()
 	{
 		SaveUserData();
 		nextLevelButton.gameObject.SetActive(false);
-		levelText.text = level.ToString();
+		gameView.SetLevelView(level);
+		if (level > 30) level = 1; // Adding a simple barrier, so the game don't breaks 
 		var puzzle = Resources.Load<PuzzleLevels>(level.ToString());
 		Puzzle.Instance.BuildPuzzle(puzzle.seed, puzzle.width, puzzle.height);
+	}
+
+	public int GetMaxLevel()
+	{
+		return maxLevel;
+	}
+	
+	public void SetLevel(int value)
+	{
+		level = value;
+		OnNextPuzzleCalled?.Invoke();
+		StartCoroutine(WaitHideAnimation());
 	}
 
 	public void SetWinValue(int value)
@@ -86,8 +100,17 @@ public class GameManager : MonoBehaviour
 	
 	private void Win()
 	{
+		OnPuzzleOver?.Invoke();
 		canvas.SetActive (true);
 	}
+
+	IEnumerator WaitHideAnimation()
+	{
+		yield return new WaitForSeconds(1f);
+		LoadPuzzle();
+	}
+
+	#region User Data
 
 	private void LoadUserData()
 	{
@@ -103,4 +126,6 @@ public class GameManager : MonoBehaviour
 		PlayerPrefs.SetInt("maxLevel", maxLevel);
 		PlayerPrefs.Save();
 	}
+
+	#endregion
 }
