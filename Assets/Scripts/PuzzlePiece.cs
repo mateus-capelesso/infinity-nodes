@@ -89,6 +89,13 @@ public class PuzzlePiece : MonoBehaviour
 		GetComponent<BoxCollider>().enabled = false;
 	}
 
+	public void PlayParticles()
+	{
+		var ps = GetComponentInChildren<ParticleSystem>();
+		if (ps != null)
+			ps.Play();
+	}
+
 	#region MouseEvents
 	private void OnMouseDown()
 	{

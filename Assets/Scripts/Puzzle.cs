@@ -218,6 +218,15 @@ public class Puzzle : MonoBehaviour
         _availablePiecePositions.Clear();
     }
 
+    public void PlayParticles()
+    {
+        foreach (var p in _pieces)
+        {
+            
+            p.PlayParticles();
+        }
+    }
+
     IEnumerator WaitHideAnimation(Action callback)
     {
         yield return new WaitForSeconds(1f);

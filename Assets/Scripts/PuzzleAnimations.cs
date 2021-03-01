@@ -7,6 +7,7 @@ using UnityEngine;
 public class PuzzleAnimations : MonoBehaviour
 {
     public Color pieceColor;
+    
 
     private void Start()
     {
@@ -16,12 +17,18 @@ public class PuzzleAnimations : MonoBehaviour
 
     private void SetToWhite()
     {
+        PlayParticles();
+        
         iTween.ValueTo(gameObject,iTween.Hash(
             "from",pieceColor,
             "to",Color.white,
             "onupdate","SetColor",
             "time", 1));
-        
+    }
+
+    private void PlayParticles()
+    {
+        Puzzle.Instance.PlayParticles();
     }
 
     private void SetColor(Color c)

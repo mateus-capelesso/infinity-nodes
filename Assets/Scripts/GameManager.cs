@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
+		Screen.sleepTimeout = SleepTimeout.NeverSleep;
 		nextLevelButton.onClick.AddListener(() =>
 		{
 			OnNextPuzzleCalled?.Invoke();
