@@ -59,78 +59,52 @@ public class Puzzle : MonoBehaviour
         seed = puzzleSeed;
         width = puzzleWidth;
         height = puzzleHeight;
+        camera.SetCameraPosition();
+        Random.InitState(seed.GetHashCode());
         GeneratePuzzle();
     }
 
     private void GeneratePuzzle()
     {
-        
-        Random.InitState(seed.GetHashCode());
-        camera.SetCameraPosition();
-        
         _availablePiecePositions = new List<PuzzlePiece>();
         _slots = new List<Slot>();
         _pieces = new PuzzlePiece[width, height];
 
-        int[] auxValues = { 0, 0, 0, 0 };
+        // Array is sorted as {Top, Right, Bottom, Left}
+        int[] connections = { 0, 0, 0, 0 };
 		
-        for (var h = 0; h < height; h++) 
+        // It uses last piece connection values to create a new piece
+        for (var i = 0; i < height; i++) 
         { 
-            for (var w = 0; w < width; w++) 
+            for (var j = 0; j < width; j++) 
             {
-                //width restrictions
-                if (w == 0)
-                    auxValues[3] = 0;
-                else
-                    auxValues[3] = _pieces[w - 1, h].PossibleConnections[1];
-
-                if (w == width - 1) 
-                    auxValues[1] = 0;
-                else
-                    auxValues[1] = Random.Range (0, 2);
+                // Width
+                connections[3] = j == 0 ? 0 : _pieces[j - 1, i].PossibleConnections[1];
+                connections[1] = j == width - 1 ? 0 : Random.Range (0, 2);
                 
-                //heigth resctrictions
-
-                if (h == 0) 
-                    auxValues[2] = 0;
-                else
-                    auxValues[2] = _pieces[w, h - 1].PossibleConnections[0];
-
-                if (h == height - 1)
-                    auxValues[0] = 0;
-                else
-                    auxValues[0] = Random.Range(0, 2);
+                // Height
+                connections[2] = i == 0 ? 0 : _pieces[j, i - 1].PossibleConnections[0];
+                connections[0] = i == height - 1 ? 0 : Random.Range(0, 2);
                 
                 //PuzzlePiece type
-                int valueSum = auxValues[0] + auxValues[1] + auxValues[2] + auxValues [3];
+                var desiredConnections = connections[0] + connections[1] + connections[2] + connections [3];
 				
-                if (valueSum == 2 && auxValues[0] != auxValues[2])
-                    valueSum = 5;
-
-
-                var slot = Instantiate(slotPrefab, new Vector3(w, h, 0), Quaternion.identity, slotParent);
-                var slotComponent = slot.GetComponent<Slot>();
-                _slots.Add(slotComponent);
-
+                // If has 2 connections and top and bottom are different, its a corner piece 
+                if (desiredConnections == 2 && connections[0] != connections[2])
+                    desiredConnections = 5;
+                
+                var slot = Instantiate(slotPrefab, new Vector3(j, i, 0), Quaternion.identity, slotParent).GetComponent<Slot>();
+                _slots.Add(slot);
                 
                 // Rotate piece until it fits the connection requirements
-                var obj = Instantiate (piecesPrefabs[valueSum], new Vector3 (w, h, 0), Quaternion.identity, puzzleAnimations.transform);
+                var piece = Instantiate (piecesPrefabs[desiredConnections], new Vector3 (j, i, 0), Quaternion.identity, puzzleAnimations.transform).GetComponent<PuzzlePiece>();
+                piece.RotateUntilConnected(connections);
 
-                while (obj.GetComponent<PuzzlePiece>().PossibleConnections [0] != auxValues [0] ||
-                       obj.GetComponent<PuzzlePiece>().PossibleConnections [1] != auxValues [1] ||
-                       obj.GetComponent<PuzzlePiece>().PossibleConnections [2] != auxValues [2] ||
-                       obj.GetComponent<PuzzlePiece>().PossibleConnections [3] != auxValues [3])
-                {
-                    obj.GetComponent<PuzzlePiece>().RotatePiece();
-                } 
-                
-                var piece = obj.GetComponent<PuzzlePiece>();
-                
-                slotComponent.SetSlotValues(new Vector2(w, h), auxValues, piece);
-                piece.CorrectPosition = new Vector2(w, h);
+                slot.SetSlotValues(new Vector2(j, i), connections, piece);
+                piece.CorrectPosition = new Vector2(j, i);
                 
                 // Ignoring begin, null and 4-way piece, just to give a direction to the player
-                if (valueSum > 1 && valueSum != 4)
+                if (desiredConnections > 1 && desiredConnections != 4)
                 {
                     _availablePiecePositions.Add(piece);
                 }
@@ -139,7 +113,7 @@ public class Puzzle : MonoBehaviour
                     piece.DeactivatePiece();
                 }
                 
-                _pieces[w, h] = piece;
+                _pieces[j, i] = piece;
             }
         }
         

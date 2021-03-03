@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
@@ -24,7 +25,7 @@ public class PuzzlePiece : MonoBehaviour
 	
 	#region RotateConnections
 	
-	public void RotatePiece()
+	private void RotatePiece()
 	{
 		transform.Rotate(new Vector3(0f, 0f , 90f));
 		RotateValues ();
@@ -32,14 +33,22 @@ public class PuzzlePiece : MonoBehaviour
 	
 	private void RotateValues()
 	{
-		int aux = PossibleConnections[0];
+		var temp = PossibleConnections[0];
 		
-		for (int i = 0; i < PossibleConnections.Length - 1; i++) {
+		for (var i = 0; i < PossibleConnections.Length - 1; i++) {
 			PossibleConnections[i] = PossibleConnections[i + 1];
 		}
-		PossibleConnections[3] = aux;
+		PossibleConnections[3] = temp;
 	}
-	
+
+	public void RotateUntilConnected(int[] desiredConnections)
+	{
+		while (!desiredConnections.SequenceEqual(PossibleConnections))
+		{
+			RotatePiece();
+		}
+	}
+
 	#endregion
 
 	public void SetNewPosition(Vector2 newPosition)
