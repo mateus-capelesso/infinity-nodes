@@ -739,7 +739,7 @@ MonoBehaviour:
   puzzleAnimations: {fileID: 567517808}
   slotPrefab: {fileID: 8949493975073475072, guid: 8bfb76f5cd5543740a352c2af88c2ca6, type: 3}
   slotParent: {fileID: 484434465}
-  camera: {fileID: 519420030}
+  cameraController: {fileID: 519420030}
 --- !u!4 &380629258
 Transform:
   m_ObjectHideFlags: 0

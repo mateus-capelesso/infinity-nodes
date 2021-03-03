@@ -8,7 +8,6 @@ public class OverlayControl : MonoBehaviour
     public Color backgroundColor;
     public Color fadedBackgroundColor;
     
-
     public void FadeInFadeOut(float duration)
     {
         gameObject.SetActive(true);

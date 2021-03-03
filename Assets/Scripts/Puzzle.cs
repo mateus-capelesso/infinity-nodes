@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class Puzzle : MonoBehaviour
@@ -39,7 +38,7 @@ public class Puzzle : MonoBehaviour
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotParent;
 
-    [Header("Camera")] public CameraController camera;
+    [Header("Camera")] public CameraController cameraController;
     
     private PuzzlePiece[,] _pieces;
     private List<Slot> _slots;
@@ -59,7 +58,7 @@ public class Puzzle : MonoBehaviour
         seed = puzzleSeed;
         width = puzzleWidth;
         height = puzzleHeight;
-        camera.SetCameraPosition();
+        cameraController.SetCameraPosition();
         Random.InitState(seed.GetHashCode());
         GeneratePuzzle();
     }
@@ -78,13 +77,13 @@ public class Puzzle : MonoBehaviour
         { 
             for (var j = 0; j < width; j++) 
             {
-                // Width
-                connections[3] = j == 0 ? 0 : _pieces[j - 1, i].PossibleConnections[1];
+                // Horizontal
                 connections[1] = j == width - 1 ? 0 : Random.Range (0, 2);
-                
-                // Height
-                connections[2] = i == 0 ? 0 : _pieces[j, i - 1].PossibleConnections[0];
+                connections[3] = j == 0 ? 0 : _pieces[j - 1, i].PossibleConnections[1];
+
+                // Vertical 
                 connections[0] = i == height - 1 ? 0 : Random.Range(0, 2);
+                connections[2] = i == 0 ? 0 : _pieces[j, i - 1].PossibleConnections[0];
                 
                 //PuzzlePiece type
                 var desiredConnections = connections[0] + connections[1] + connections[2] + connections [3];
@@ -126,7 +125,7 @@ public class Puzzle : MonoBehaviour
         for (int i = 0; i < _availablePiecePositions.Count; i++)
         {
             if(_availablePiecePositions[i].swapped) continue;
-
+        
             // variable swapped controls which pieces weren't swapped
             var toBeSwappedList = _availablePiecePositions.Where(p => !p.swapped).ToList();
             
@@ -136,32 +135,34 @@ public class Puzzle : MonoBehaviour
                 _availablePiecePositions[i].SetNewPosition(_availablePiecePositions[i].CorrectPosition);
                 break;
             }
-            var random = Random.Range(0, toBeSwappedList.Count);
             
+            var random = Random.Range(0, toBeSwappedList.Count);
             var firstPiece = _availablePiecePositions[i];
             var secondPiece = toBeSwappedList[random];
-
+        
             if (firstPiece != secondPiece)
-            {
                 SwapPieceByPieces(firstPiece, secondPiece);
-            }
             else
-            {
                 i--;
-            }
         }
     }
     
-    public void SwapPieceByPieces(PuzzlePiece firstPiece, PuzzlePiece secondPiece)
+    private void SwapPieceByPieces(PuzzlePiece firstPiece, PuzzlePiece secondPiece)
     {
         firstPiece.SetNewPosition(secondPiece.CorrectPosition);
         secondPiece.SetNewPosition(firstPiece.CorrectPosition);
     }
     
+    // swap position between dragged piece and the one that sits on spot
+    public void SwapPieceByPosition(Vector2 newPosition, Vector2 initialPosition)
+    {
+        _availablePiecePositions.FirstOrDefault(p => p.GetInitiatePosition() == newPosition)?.SetNewPosition(initialPosition);
+    }
+    
     // returns the slot that has the same coordinate as the dragged piece
     private Slot GetSlotFromCoordinate(Vector2 coordinates)
     {
-        return _slots.Where(s => s.GetSlotFromPosition(coordinates)).ToList().First();
+        return _slots.FirstOrDefault(s => s.GetSlotFromPosition(coordinates));
     }
     
     // checks if dragged piece has the correct connection values
@@ -169,14 +170,7 @@ public class Puzzle : MonoBehaviour
     {
         return GetSlotFromCoordinate(coordinates).CorrectConnections(pieceConnection);
     }
-    
-    // swap position between dragged piece and the one that sits on spot
-    public void SwapPieceByPosition(Vector2 newPosition, Vector2 initialPosition)
-    {
-        var piece = _availablePiecePositions.Where(p => p.GetInitiatePosition() == newPosition).ToList().First();
-        piece.SetNewPosition(initialPosition);
-    }
-
+   
     public Vector2 GetPuzzleSize()
     {
         return new Vector2(width, height);
@@ -201,11 +195,7 @@ public class Puzzle : MonoBehaviour
 
     public void PlayParticlesFromPieces()
     {
-        foreach (var p in _pieces)
-        {
-            
-            p.PlayParticles();
-        }
+        foreach (var p in _pieces) p.PlayParticles();
     }
 
     IEnumerator WaitHideAnimation(Action callback)
