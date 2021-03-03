@@ -5,39 +5,40 @@ using UnityEngine.UI;
 public class OverlayControl : MonoBehaviour
 {
     public Image overlay;
-    public Color backgroundColor;
-    public Color fadedBackgroundColor;
-    
-    public void FadeInFadeOut(float duration)
+
+    public void FadeInFadeOut(float duration = 1f)
     {
         gameObject.SetActive(true);
+        
         iTween.ValueTo(gameObject,iTween.Hash(
-            "from",overlay.color,
-            "to",backgroundColor,
+            "from", 1f,
+            "to", 0f,
             "time", duration,
-            "onupdate","SetColor",
+            "onupdate","SetColorAlpha",
             "oncomplete", "FadeOut",
             "oncompleteparams", duration));
     }
 
-    public void FadeIn(float duration)
+    public void FadeIn(float duration = 1f, GameObject target = null, string method = null)
     {
         gameObject.SetActive(true);
         iTween.ValueTo(gameObject,iTween.Hash(
-            "from",overlay.color,
-            "to",backgroundColor,
+            "from", 0f,
+            "to", 1f,
             "time", duration,
-            "onupdate","SetColor"));
+            "onupdate","SetColorAlpha",
+            "oncompletetarget", target,
+            "oncomplete", method));
     }
 
-    public void FadeOut(float duration)
+    public void FadeOut(float duration = 1f)
     {
         gameObject.SetActive(true);
         iTween.ValueTo(gameObject,iTween.Hash(
-            "from",overlay.color,
-            "to",fadedBackgroundColor,
-            "onupdate","SetColor",
+            "from", 1f,
+            "to", 0f,
             "time", duration,
+            "onupdate","SetColorAlpha",
             "oncomplete", "EndFadeOut"));
     }
 
@@ -45,9 +46,10 @@ public class OverlayControl : MonoBehaviour
     {
         gameObject.SetActive(false);
     }
-    
-    private void SetColor(Color c)
+
+    private void SetColorAlpha(float alphaValue)
     {
-        overlay.color = c;
+        var color = overlay.color;
+        overlay.color = new Color(color.r, color.g, color.b, alphaValue);
     }
 }

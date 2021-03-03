@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
 	public GameView gameView;
 
 
-	private int _winValue;
+	private int _totalPiecesSwapped;
 	private int _piecesOnCorrectPlaces;
 
 	private int _level;
@@ -71,33 +71,30 @@ public class GameManager : MonoBehaviour
 
 	public void SetWinValue(int value)
 	{
-		_winValue = value;
+		_totalPiecesSwapped = value;
 		_piecesOnCorrectPlaces = 0;
 	}
 
 	public void PieceOnCorrectPosition()
 	{
 		_piecesOnCorrectPlaces++;
-		if (_piecesOnCorrectPlaces >= _winValue)
-		{
-			Win();
-			_points += _winValue;
-			_level++;
-			if (_level > _maxLevel)
-			{
-				_maxLevel = _level;
-			}
-
-			StartCoroutine(WaitHideAnimation(2f));
-		}
+		if (_piecesOnCorrectPlaces < _totalPiecesSwapped) return;
+		OnPuzzleOver?.Invoke();
+			
+		PointsAndLevelOperations();
+		StartCoroutine(WaitHideAnimation(2f));
 	}
 	
-	private void Win()
+	private void PointsAndLevelOperations()
 	{
-		OnPuzzleOver?.Invoke();
-		canvas.SetActive (true);
+		_points += _totalPiecesSwapped;
+		_level++;
+		
+		if (_level > _maxLevel)
+			_maxLevel = _level;
 	}
-
+	
+	// TODO: change wait function, manager don't need to handle this kind of operation
 	IEnumerator WaitHideAnimation(float time)
 	{
 		yield return new WaitForSeconds(0.5f);

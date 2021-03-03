@@ -14,7 +14,6 @@ public class PuzzleAnimations : MonoBehaviour
         GameManager.Instance.OnPuzzleOver += SetToWhite;
     }
     
-
     private void SetToWhite()
     {
         PlayParticles();
@@ -22,8 +21,8 @@ public class PuzzleAnimations : MonoBehaviour
         iTween.ValueTo(gameObject,iTween.Hash(
             "from",pieceColor,
             "to",Color.white,
-            "onupdate","SetColor",
-            "time", 1));
+            "onupdate","SetPiecesColor",
+            "time", 0.5f));
     }
 
     private void PlayParticles()
@@ -31,7 +30,7 @@ public class PuzzleAnimations : MonoBehaviour
         Puzzle.Instance.PlayParticlesFromPieces();
     }
 
-    private void SetColor(Color c)
+    private void SetPiecesColor(Color c)
     {
         var renderers = GetComponentsInChildren<SpriteRenderer>();
         foreach (var r in renderers)

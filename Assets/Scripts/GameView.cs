@@ -26,9 +26,8 @@ public class GameView : MonoBehaviour
         
         GameManager.Instance.OnNextPuzzleCalled += (() =>
         {
-            
             overlay.gameObject.SetActive(true);
-            overlay.FadeInFadeOut(1.5f);
+            overlay.FadeInFadeOut();
         });
         
         overlay.FadeOut(0.5f);
@@ -42,7 +41,7 @@ public class GameView : MonoBehaviour
     private void ActivateLevelsGrid()
     {
         var maxLevel = GameManager.Instance.GetMaxLevel();
-        overlay.FadeIn(0.5f);
+        overlay.FadeIn(0.5f, gameObject, "ShowLevelsGrid");
         
         for (int i = 1; i < maxLevel; i++)
         {
@@ -55,6 +54,10 @@ public class GameView : MonoBehaviour
                 GoToLevel(desiredLevel);
             }));
         }
+    }
+
+    public void ShowLevelsGrid()
+    {
         gridParent.gameObject.SetActive(true);
         closeGridButton.gameObject.SetActive(true);
     }
