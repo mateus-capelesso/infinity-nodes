@@ -102,7 +102,7 @@ public class Puzzle : MonoBehaviour
                 slot.SetSlotValues(new Vector2(j, i), connections, piece);
                 piece.CorrectPosition = new Vector2(j, i);
                 
-                // Ignoring begin, null and 4-way piece, just to give a direction to the player
+                // Ignores begin, null and 4-way piece, just to give a direction to the player
                 if (desiredConnections > 1 && desiredConnections != 4)
                 {
                     _availablePiecePositions.Add(piece);
